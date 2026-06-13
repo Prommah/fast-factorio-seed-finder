@@ -151,16 +151,18 @@ int main(int argc, char* argv[]) {
                     default:     img[idx+0]=255; img[idx+1]=255; img[idx+2]=255; break;
                 }
             }
+            if (biter_idx < 9)
+            {
+                for (const auto& p : biters[biter_idx]) {
+                    float dist = PositionF32::distance({ wx, wy }, p.pos);
 
-            for (const auto& p : biters[biter_idx]) {
-                float dist = PositionF32::distance({ wx, wy }, p.pos);
+                    float slope = 0.f;
+                    if (p.radius > 0.f) slope = 3.f * p.quantity / float(M_PI * p.radius * p.radius * p.radius);
 
-                float slope = 0.f;
-                if (p.radius > 0.f) slope = 3.f * p.quantity / float(M_PI * p.radius * p.radius * p.radius);
-
-                float val = (p.radius - dist) * slope;
-                if (val > 0) {
-                    img[idx+0] = 255; img[idx+1] = 25; img[idx+2] = 25;
+                    float val = (p.radius - dist) * slope;
+                    if (val > 0) {
+                        img[idx+0] = 255; img[idx+1] = 25; img[idx+2] = 25;
+                    }
                 }
             }
         }
