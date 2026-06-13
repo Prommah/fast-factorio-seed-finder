@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
     auto regular = regular_patches(precompute, cache, seed0, { 0, 0 });
     auto starter = starter_patches(settings, precompute, noise, cache, seed0);
     std::array<PatchArray, 9> biters;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < (int)(biters.size()); i++) {
         biters[i] = enemy_bases(settings, precompute, seed0, { i % 3 - 1, i / 3 - 1 });
     }
 
@@ -151,7 +151,8 @@ int main(int argc, char* argv[]) {
                     default:     img[idx+0]=255; img[idx+1]=255; img[idx+2]=255; break;
                 }
             }
-            if (biter_idx < 9)
+
+            if (biter_idx < biters.size())
             {
                 for (const auto& p : biters[biter_idx]) {
                     float dist = PositionF32::distance({ wx, wy }, p.pos);
