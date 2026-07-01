@@ -90,8 +90,10 @@ int main(int argc, char* argv[]) {
     auto regular = regular_patches(precompute, cache, seed0, { 0, 0 });
     auto starter = starter_patches(settings, precompute, noise, cache, seed0);
     std::array<PatchArray, 9> biters;
-    for (int i = 0; i < 9; i++) {
-        biters[i] = enemy_bases(settings, precompute, seed0, { i % 3 - 1, i / 3 - 1 });
+    if (settings.biter_frequency > 0 && settings.biter_size > 0) {
+        for (int i = 0; i < (int)(biters.size()); i++) {
+            biters[i] = enemy_bases(settings, precompute, seed0, { i % 3 - 1, i / 3 - 1 });
+        }
     }
 
     // Output buffer: RGB bytes
@@ -152,15 +154,17 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            for (const auto& p : biters[biter_idx]) {
-                float dist = PositionF32::distance({ wx, wy }, p.pos);
+            if (settings.biter_frequency > 0 && settings.biter_size > 0 && biter_idx < biters.size()) {
+                for (const auto& p : biters[biter_idx]) {
+                    float dist = PositionF32::distance({ wx, wy }, p.pos);
 
-                float slope = 0.f;
-                if (p.radius > 0.f) slope = 3.f * p.quantity / float(M_PI * p.radius * p.radius * p.radius);
+                    float slope = 0.f;
+                    if (p.radius > 0.f) slope = 3.f * p.quantity / float(M_PI * p.radius * p.radius * p.radius);
 
-                float val = (p.radius - dist) * slope;
-                if (val > 0) {
-                    img[idx+0] = 255; img[idx+1] = 25; img[idx+2] = 25;
+                    float val = (p.radius - dist) * slope;
+                    if (val > 0) {
+                        img[idx+0] = 255; img[idx+1] = 25; img[idx+2] = 25;
+                    }
                 }
             }
         }
