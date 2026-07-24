@@ -220,7 +220,7 @@ static float modified_amplitude(float output_scale, uint32_t octaves, float pers
         return output_scale;
     } else {
         const float persistence_2 = persistence*persistence;
-        const float whatever_this_is = Math::exp2f(Math::log2f(persistence_2) * (float)octaves);
+        const float whatever_this_is = Math::fastpow2(Math::fastlog2(persistence_2) * (float)octaves);
         const float whatever_that_is = (persistence_2 - 1.f) / (whatever_this_is - 1.f);
         return std::sqrtf(whatever_that_is) * output_scale;
     }
