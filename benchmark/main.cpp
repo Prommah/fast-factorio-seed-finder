@@ -69,6 +69,30 @@ static auto benchmark_3(const int n) {
     return duration;
 }
 
+static auto benchmark_elevation(const int n) {
+    Random rand(0);
+
+    constexpr MapGenSettings settings;
+    const NoisePrecompute precompute(settings);
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < n; i++) {
+        const auto seed = rand.random();
+        const Noise noise(seed, true, true);
+
+        for (int x = -1000; x <= 1000; ++x) {
+            for (int y = -1000; y <= 1000; ++y) {
+                noise.elevation(settings, precompute, {static_cast<float>(x), static_cast<float>(y)});;
+            }
+        }
+    }
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::println("{}", duration);
+    return duration;
+}
+
 static void run_bench(const std::function<std::chrono::milliseconds(int)>& func, const std::string& name,
     const int loops, const int iterations) {
     std::println("{}", name);
@@ -84,6 +108,7 @@ static void run_bench(const std::function<std::chrono::milliseconds(int)>& func,
 }
 
 int main() {
+    run_bench(benchmark_elevation, "Elevation", 10, 10);
     run_bench(benchmark, "1", 10, 500);
     run_bench(benchmark_2, "2", 10, 1000000);
     run_bench(benchmark_3, "3", 10, 100000);
