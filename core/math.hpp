@@ -76,6 +76,29 @@ inline float powf(float b, float e) {
     return exp2f(log2f(b) * e);
 }
 
+// from https://code.google.com/archive/p/fastapprox/
+inline float fastlog2 (float x) {
+    union { float f; uint32_t i; } vx = { x };
+    union { uint32_t i; float f; } mx = { (vx.i & 0x007FFFFF) | 0x3f000000 };
+    float y = vx.i;
+    y *= 1.1920928955078125e-7f;
+
+    return y - 124.22551499f
+             - 1.498030302f * mx.f
+             - 1.72587999f / (0.3520887068f + mx.f);
+}
+
+// from https://code.google.com/archive/p/fastapprox/
+inline float fastpow2 (float p) {
+    float offset = (p < 0) ? 1.0f : 0.0f;
+    float clipp = (p < -126) ? -126.0f : p;
+    int w = clipp;
+    float z = clipp - w + offset;
+    union { uint32_t i; float f; } v = { static_cast<uint32_t> ( (1 << 23) * (clipp + 121.2740575f + 27.7280233f / (4.84252568f - z) - 1.49012907f * z) ) };
+
+    return v.f;
+}
+
 inline float sin(float x) {
     constexpr double c_2500 = std::bit_cast<double>(0x3fd0000000000000); // 0.25
     constexpr double c_inv_2pi = std::bit_cast<double>(0x3fc45f306dc9c883); // 1/2pi
