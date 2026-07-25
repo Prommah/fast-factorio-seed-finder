@@ -1,10 +1,8 @@
 #include "noise.hpp"
 #include <chrono>
 #include <print>
-#include <iostream>
-#include <fstream>
 
-void benchmark(int n) {
+static auto benchmark(const int n) {
     Noise noise(250, false, false);
     float sum = 0;
 
@@ -16,67 +14,79 @@ void benchmark(int n) {
             }
         }
     }
-    auto end = std::chrono::high_resolution_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now();
 
-    std::println("{} {}", sum, std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::println("{} {}", sum, duration);
+    return duration;
 }
 
-void benchmark_2(int n) {
+static auto benchmark_2(const int n) {
     MapGenSettings settings;
     for (ResourceType t = IRON; t < NB_RESOURCE_TYPE; ++t) {
         settings.frequencies[t] = 6.f;
         settings.sizes[t] = 6.f;
         settings.richness[t] = 6.f;
     }
-    auto start = std::chrono::high_resolution_clock::now();
     NoisePrecompute precompute(settings);
     NoiseCache cache;
-    auto end = std::chrono::high_resolution_clock::now();
-    std::println("cache/precompute init {}", std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
 
     float sum = 0.f;
 
-    start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < n; i++) {
         auto patches = regular_patches(precompute, cache, i, { 0, 0 });
         for (const auto& patch : patches[1]) {
             sum += patch.radius;
         }
     }
-    end = std::chrono::high_resolution_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now();
 
-    std::println("{} {}", sum, std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::println("{} {}", sum, duration);
+    return duration;
 }
 
-void benchmark_3(int n) {
+static auto benchmark_3(const int n) {
     MapGenSettings settings;
     for (ResourceType t = IRON; t < NB_RESOURCE_TYPE; ++t) {
         settings.frequencies[t] = 6.f;
         settings.sizes[t] = 6.f;
         settings.richness[t] = 6.f;
     }
-    auto start = std::chrono::high_resolution_clock::now();
     NoisePrecompute precompute(settings);
     NoiseCache cache;
-    auto end = std::chrono::high_resolution_clock::now();
-    std::println("cache/precompute init {}", std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
     
-    start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < n; i++) {
         Noise noise(i, true, false);
         starter_patches(settings, precompute, noise, cache, i);
     }
-    end = std::chrono::high_resolution_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now();
 
-    std::println("{}", std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::println("{}", duration);
+    return duration;
+}
+
+static void run_bench(const std::function<std::chrono::milliseconds(int)>& func, const std::string& name,
+    const int loops, const int iterations) {
+    std::println("{}", name);
+
+    std::chrono::milliseconds total_duration{0};
+    for (int i = 0; i < loops; i++) {
+        total_duration += func(iterations);
+    }
+
+    const auto avg = total_duration / loops;
+    std::println("Average: {}", avg);
+    std::println();
 }
 
 int main() {
-    if (false) {
-        benchmark_3(100000);
-    } else {
-        while (true) benchmark_3(100000);
-    }
+    run_bench(benchmark, "1", 10, 500);
+    run_bench(benchmark_2, "2", 10, 1000000);
+    run_bench(benchmark_3, "3", 10, 100000);
 
     // 7.8s for 1000000
     // 6.7s => chunk_size = ceil(suggested_distance)
