@@ -2,6 +2,19 @@
 #include <chrono>
 #include <print>
 
+#define STRINGIFY_(x) #x
+#define STRINGIFY(x) STRINGIFY_(x)
+
+#if defined(__clang__)
+    #define COMPILER_VERSION_STRING __VERSION__
+#elif defined(__GNUC__)
+    #define COMPILER_VERSION_STRING "GCC " __VERSION__
+#elif defined(_MSC_VER)
+    #define COMPILER_VERSION_STRING "MSVC " STRINGIFY(_MSC_VER)
+#else
+    #define COMPILER_VERSION_STRING "Unknown compiler"
+#endif
+
 static auto benchmark(const int n) {
     Noise noise(250, false, false);
     float sum = 0;
@@ -108,6 +121,11 @@ static void run_bench(const std::function<std::chrono::milliseconds(int)>& func,
 }
 
 int main() {
+    std::println("Built with: {}", COMPILER_VERSION_STRING);
+    std::println("Flags: {}", BUILD_FLAGS);
+
+    std::println();
+
     run_bench(benchmark_elevation, "Elevation", 10, 10);
     run_bench(benchmark, "1", 10, 500);
     run_bench(benchmark_2, "2", 10, 1000000);
