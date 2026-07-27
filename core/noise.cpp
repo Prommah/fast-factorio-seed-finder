@@ -76,21 +76,19 @@ NoisePrecompute::NoisePrecompute(const MapGenSettings& settings) {
         _starter_radii[type] = RQ_FACTORS[STARTER][type] * Math::cbrtf(_starter_quantities[type]);
     }
 
-    const float water_frequency = 1.f / settings.water_scale;
+    _water_frequency = 1.f / settings.water_scale;
     const float water_size = settings.water_coverage;
 
     _water_level = 10 * Math::log2f(water_size);
 
-    const float nauvis_segmentation_multiplier = 1.5f * water_frequency;
-    _nauvis_hills_input_scale = nauvis_segmentation_multiplier / 90.f;
-    _nauvis_hills_cliff_level_input_scale = nauvis_segmentation_multiplier / 500.f;
-    _starting_macro_multiplier_base = nauvis_segmentation_multiplier / 2000.f;
-    _nauvis_bridge_billows_input_scale = nauvis_segmentation_multiplier / 150.f;
-    _nauvis_persistance_input_scale = nauvis_segmentation_multiplier / 2.f;
-    _nauvis_offset_x = 10000.f / nauvis_segmentation_multiplier;
-    _nauvis_detail_input_scale = nauvis_segmentation_multiplier / 14.f;
-    _nauvis_macro_input_scale = nauvis_segmentation_multiplier / 1600.f;
-    _starting_island_multiplier = water_frequency / 200.f;
+    _nauvis_segmentation_multiplier = 1.5f * _water_frequency;
+    _nauvis_hills_input_scale = _nauvis_segmentation_multiplier / 90.f;
+    _nauvis_hills_cliff_level_input_scale = _nauvis_segmentation_multiplier / 500.f;
+    _nauvis_bridge_billows_input_scale = _nauvis_segmentation_multiplier / 150.f;
+    _nauvis_persistance_input_scale = _nauvis_segmentation_multiplier / 2.f;
+    _nauvis_offset_x = 10000.f / _nauvis_segmentation_multiplier;
+    _nauvis_detail_input_scale = _nauvis_segmentation_multiplier / 14.f;
+    _nauvis_macro_input_scale = _nauvis_segmentation_multiplier / 1600.f;
 }
 
 PositionI32 starter_lake_position(uint32_t seed) {
@@ -333,7 +331,7 @@ float Noise::_elevation_nauvis_function(const MapGenSettings&, const NoisePrecom
     const float distance_from_spawn = pos.length();
     const float starting_lake_distance = std::min(PositionF32::distance(pos, _starter_lake), 1024.f);
 
-    const float starting_macro_multiplier = std::clamp(distance_from_spawn * precompute.get_starting_macro_multiplier_base(), 0.f, 1.f);
+    const float starting_macro_multiplier = std::clamp(distance_from_spawn * precompute.get_nauvis_segmentation_multiplier() / 2000.f, 0.f, 1.f);
 
     const float nauvis_bridge_billows = std::abs(_multioctave_noise_internal(
         _custom_offset_permutations[(size_t)Seed0CustomOffsets::NAUVIS_BRIDGE_BILLOWS],
@@ -400,7 +398,7 @@ float Noise::_elevation_nauvis_function(const MapGenSettings&, const NoisePrecom
             3.f * nauvis_macro * starting_macro_multiplier
         );
 
-    const float starting_island = nauvis_main + ELEVATION_MAGNITUDE * (2.5f - distance_from_spawn * precompute.get_starting_island_multiplier());
+    const float starting_island = nauvis_main + ELEVATION_MAGNITUDE * (2.5f - distance_from_spawn * precompute.get_water_frequency() / 200.f);
     const float starting_lake = ELEVATION_MAGNITUDE * (-3.f + (starting_lake_distance + starting_lake_noise) / 8.f) / 8.f;
     
     const float wlc_elevation = std::max(nauvis_main - precompute.get_water_level() * WLC_AMPLITUDE, starting_island);
