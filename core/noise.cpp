@@ -213,17 +213,17 @@ float Noise::noise(uint8_t seed1, PositionF32 pos, float input_scale, float outp
     return _noise_internal(_permutations[0], seed1, pos, input_scale, output_scale, offset_x, offset_y);
 }
 
-static float modified_amplitude(const float output_scale, const uint32_t octaves, const float persistence) {
+static float modified_amplitude(const uint32_t octaves, const float persistence) {
     if (persistence == 1.f) {
-        return (float)(output_scale / std::sqrt((double)octaves));
+        return (float)(1.f / std::sqrt((double)octaves));
     }
     if (persistence == 0.f) {
-        return output_scale;
+        return 1.f;
     }
     const float persistence_2 = persistence*persistence;
     const float whatever_this_is = Math::fastpow(persistence_2, (float)octaves);
     const float whatever_that_is = (persistence_2 - 1.f) / (whatever_this_is - 1.f);
-    return std::sqrtf(whatever_that_is) * output_scale;
+    return std::sqrtf(whatever_that_is);
 }
 
 float Noise::_multioctave_noise_internal(
@@ -231,7 +231,7 @@ float Noise::_multioctave_noise_internal(
     float input_scale, float output_scale, float offset_x, float offset_y
 ) const {
     const float inv_persistence = 1.f / persistence;
-    output_scale = modified_amplitude(output_scale, octaves, inv_persistence);\
+    output_scale *= modified_amplitude(octaves, inv_persistence);
     float sum = 0.f;
 
     for (uint32_t current_octave = 0; current_octave < octaves; current_octave++) {
