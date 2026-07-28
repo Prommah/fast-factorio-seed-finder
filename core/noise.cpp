@@ -213,17 +213,42 @@ float Noise::noise(uint8_t seed1, PositionF32 pos, float input_scale, float outp
     return _noise_internal(_permutations[0], seed1, pos, input_scale, output_scale, offset_x, offset_y);
 }
 
-static float modified_amplitude(const uint32_t octaves, const float persistence) {
+static float modified_amplitude_calc(const uint32_t octaves, const float persistence) {
     if (persistence == 1.f) {
         return (float)(1.f / std::sqrt((double)octaves));
-    }
-    if (persistence == 0.f) {
-        return 1.f;
     }
     const float persistence_2 = persistence*persistence;
     const float whatever_this_is = Math::fastpow(persistence_2, (float)octaves);
     const float whatever_that_is = (persistence_2 - 1.f) / (whatever_this_is - 1.f);
     return std::sqrtf(whatever_that_is);
+}
+
+static float modified_amplitude(const uint32_t octaves, const float persistence) {
+    if (persistence == 0.f) {
+        return 1.f;
+    }
+
+    struct Entry { uint32_t octaves; uint32_t persistenceBits; float result; };
+
+    constexpr size_t max_cache_entries = 8;
+    thread_local std::array<Entry, max_cache_entries> cache{};
+    thread_local size_t count = 0;
+
+    const auto persistenceBits = std::bit_cast<uint32_t>(persistence);
+
+    for (size_t i = 0; i < count; ++i) {
+        if (cache[i].octaves == octaves && cache[i].persistenceBits == persistenceBits) {
+            return cache[i].result;
+        }
+    }
+
+    const float result = modified_amplitude_calc(octaves, persistence);
+
+    if (count < max_cache_entries) {
+        cache[count++] = Entry{.octaves = octaves, .persistenceBits = persistenceBits, .result = result};
+    }
+
+    return result;
 }
 
 float Noise::_multioctave_noise_internal(
