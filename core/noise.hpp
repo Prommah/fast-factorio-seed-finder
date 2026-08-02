@@ -21,17 +21,17 @@ public:
     inline const auto& get_starter_quantities() const { return _starter_quantities; }
     inline const auto& get_starter_radii() const { return _starter_radii; }
 
+    float get_water_frequency() const { return _water_frequency;}
     inline float get_water_level() const { return _water_level; }
-    
+
+    float get_nauvis_segmentation_multiplier() const { return _nauvis_segmentation_multiplier; }
     inline float get_nauvis_hills_input_scale() const { return _nauvis_hills_input_scale; }
     inline float get_nauvis_hills_cliff_level_input_scale() const { return _nauvis_hills_cliff_level_input_scale; }
-    inline float get_starting_macro_multiplier_base() const { return _starting_macro_multiplier_base; }
     inline float get_nauvis_bridge_billows_input_scale() const { return _nauvis_bridge_billows_input_scale; }
     inline float get_nauvis_persistance_input_scale() const { return _nauvis_persistance_input_scale; }
     inline float get_nauvis_offset_x() const { return _nauvis_offset_x; }
     inline float get_nauvis_detail_input_scale() const { return _nauvis_detail_input_scale; }
     inline float get_nauvis_macro_input_scale() const { return _nauvis_macro_input_scale; }
-    inline float get_starting_island_multiplier() const { return _starting_island_multiplier; }
 
 private:
     inline static std::array<float, STARTER_NB_SPOTS>* s_starter_penalties = nullptr;
@@ -44,17 +44,17 @@ private:
     std::array<float, NB_RESOURCE_TYPE> _base_regular_densities;
     std::array<float, NB_RESOURCE_TYPE> _base_regular_quantities;
 
+    float _water_frequency;
     float _water_level;
 
+    float _nauvis_segmentation_multiplier;
     float _nauvis_hills_input_scale;
     float _nauvis_hills_cliff_level_input_scale;
-    float _starting_macro_multiplier_base;
     float _nauvis_bridge_billows_input_scale;
     float _nauvis_persistance_input_scale;
     float _nauvis_offset_x;
     float _nauvis_detail_input_scale;
     float _nauvis_macro_input_scale;
-    float _starting_island_multiplier;
 };
 
 PositionI32 starter_lake_position(uint32_t seed);
