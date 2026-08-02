@@ -103,7 +103,7 @@ inline float fastpow2 (float p) {
 // https://lua-api.factorio.com/latest/auxiliary/noise-expressions.html#log2
 static float decompiled_log2(const float input) {
     auto x = static_cast<double>(input);
-    uint uVar1;
+    uint32_t uVar1;
     int iVar2;
     if (std::bit_cast<int64_t>(x) < 0x10000000000000) {
         if (x == 0) {
@@ -113,10 +113,10 @@ static float decompiled_log2(const float input) {
             return NAN;
         }
         x = x * 18014398509481984.0;
-        uVar1 = static_cast<uint>(std::bit_cast<uint64_t>(x) >> 0x20);
+        uVar1 = static_cast<uint32_t>(std::bit_cast<uint64_t>(x) >> 0x20);
         iVar2 = -0x435;
     } else {
-        uVar1 = static_cast<uint>(std::bit_cast<uint64_t>(x) >> 0x20);
+        uVar1 = static_cast<uint32_t>(std::bit_cast<uint64_t>(x) >> 0x20);
         if (0x7fe < uVar1 >> 20) {
             return static_cast<float>(x);
         }
@@ -125,13 +125,13 @@ static float decompiled_log2(const float input) {
             return 0.f;
         }
     }
-    x = std::bit_cast<double>(std::bit_cast<ulong>(x) & 0xffffffff |
-                    (ulong)((uVar1 + 0x95f62 & 0xfffff) + 0x3fe6a09e) << 32) + -1.0;
+    x = std::bit_cast<double>(std::bit_cast<uint64_t>(x) & 0xffffffff |
+                    (uint64_t)((uVar1 + 0x95f62 & 0xfffff) + 0x3fe6a09e) << 32) + -1.0;
     double dVar6 = x / (x + 2.0);
     const double dVar7 = dVar6 * dVar6;
     const double dVar8 = dVar7 * dVar7;
     double dVar5 = x * 0.5 * x;
-    const auto dVar9 = std::bit_cast<double>(std::bit_cast<ulong>(x - dVar5) & 0xffffffff00000000);
+    const auto dVar9 = std::bit_cast<double>(std::bit_cast<uint64_t>(x - dVar5) & 0xffffffff00000000);
     dVar6 = (dVar7 * (((dVar8 * 0.14798198605116586 + 0.1818357216161805) * dVar8 + 0.2857142874366239
                       ) * dVar8 + 0.6666666666666735) +
              dVar8 * ((dVar8 * 0.15313837699209373 + 0.22222198432149784) * dVar8 + 0.3999999999940942
